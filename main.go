@@ -1,22 +1,37 @@
 package main
 
-import "fmt"
+import (
+	"pizzaria/models"
 
-type Pizza struct {
-	ID    int
-	nome  string
-	preco float64
-}
+	"github.com/gin-gonic/gin"
+)
 
 func main() {
-	//nomePizzaria, instagram, telefone := "Pizzaria", "pizzaria_exemplo", 123456789
-	// Corrigindo a sintaxe para atribuição de múltiplas variáveis
+	router := gin.Default()
+	router.GET("/pizzas", getPizzas) // Define a rota para obter pizzas
+	router.POST("/pizzas", addPizza) // Rota para adicionar pizza
+	router.Run(":8080")              // Inicia o servidor na porta 8080
+}
 
-	var pizzas = []Pizza{
-		{ID: 1, nome: "Margherita", preco: 29.90},
-		{ID: 2, nome: "Pepperoni", preco: 34.90},
-		{ID: 3, nome: "Quatro Queijos", preco: 39.90},
+var pizzas = []models.Pizza{
+	{ID: 1, Nome: "Margherita", Preco: 29.90},
+	{ID: 2, Nome: "Pepperoni", Preco: 34.90},
+	{ID: 3, Nome: "Quatro Queijos", Preco: 39.90},
+}
+
+func getPizzas(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"pizzas": pizzas,
+	})
+
+}
+
+func addPizza(c *gin.Context) {
+	var novaPizza models.Pizza
+	if err := c.ShouldBindJSON(&novaPizza); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
 	}
-
-	fmt.Println(pizzas)
+	pizzas = append(pizzas, novaPizza)
+	c.JSON(201, gin.H{"message": "Pizza adicionada com sucesso!", "pizza": novaPizza})
 }
